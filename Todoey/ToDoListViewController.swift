@@ -12,9 +12,15 @@ class ToDoListViewController: UITableViewController{
 
     @IBOutlet var toDoListTableView: UITableView!
     
+    let localStorage = UserDefaults.standard
+    
     var itemArray = ["milk", "cleanin", "go home","milk1", "cleanin1", "go home1","milk2", "cleanin2", "go home2","milk3", "cleanin3", "go home3","milk4", "cleanin4", "go home4"]
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        if let array = localStorage.array(forKey: "TodoListArray") as? [String] {
+            itemArray = array
+        }
         
     }
     
@@ -63,6 +69,7 @@ class ToDoListViewController: UITableViewController{
             } else {
                 self.itemArray.append(textField.text!)
                 self.tableView.reloadData()
+                self.localStorage.set(self.itemArray, forKey: "TodoListArray")
             }
         }
         alert.addTextField { (alertTextField) in
