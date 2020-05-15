@@ -29,7 +29,14 @@
                             <outlet property="delegate" destination="G9h-ch-0mN" id="3Le-DP-hwM"/>
                         </connections>
                     </tableView>
-                    <navigationItem key="navigationItem" id="vzu-lI-j0G"/>
+                    <navigationItem key="navigationItem" id="vzu-lI-j0G">
+                        <barButtonItem key="rightBarButtonItem" systemItem="add" id="pSL-aX-UNG">
+                            <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                            <connections>
+                                <action selector="addButtonPressed:" destination="G9h-ch-0mN" id="m1d-Pp-RZe"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
                     <connections>
                         <outlet property="toDoListTableView" destination="DIW-Ck-p6n" id="Q3y-7f-0vJ"/>
                     </connections>
