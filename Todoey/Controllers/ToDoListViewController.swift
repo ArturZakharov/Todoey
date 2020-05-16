@@ -14,11 +14,43 @@ class ToDoListViewController: UITableViewController{
     
     let localStorage = UserDefaults.standard
     
-    var itemArray = ["milk", "cleanin", "go home","milk1", "cleanin1", "go home1","milk2", "cleanin2", "go home2","milk3", "cleanin3", "go home3","milk4", "cleanin4", "go home4"]
+//    var itemArray = ["milk", "cleanin", "go home","milk1", "cleanin1", "go home1","milk2", "cleanin2", "go home2","milk3", "cleanin3", "go home3","milk4", "cleanin4", "go home4"]
+    
+    var itemArray = [ToDoItem(titel: "milk"),
+                     ToDoItem(titel: "cleanin"),
+                     ToDoItem(titel: "go home"),
+                     ToDoItem(titel: "milk"),
+                     ToDoItem(titel: "cleanin"),
+                     ToDoItem(titel: "go home"),
+                     ToDoItem(titel: "milk"),
+                     ToDoItem(titel: "cleanin"),
+                     ToDoItem(titel: "go home"),
+                     ToDoItem(titel: "milk"),
+                     ToDoItem(titel: "cleanin"),
+                     ToDoItem(titel: "go home"),
+                     ToDoItem(titel: "milk"),
+                     ToDoItem(titel: "cleanin"),
+                     ToDoItem(titel: "go home"),
+                     ToDoItem(titel: "milk"),
+                     ToDoItem(titel: "cleanin"),
+                     ToDoItem(titel: "go home"),
+                     ToDoItem(titel: "milk"),
+                     ToDoItem(titel: "cleanin"),
+                     ToDoItem(titel: "go home"),
+                     ToDoItem(titel: "milk"),
+                     ToDoItem(titel: "cleanin"),
+                     ToDoItem(titel: "go home"),
+                     ToDoItem(titel: "milk"),
+                     ToDoItem(titel: "cleanin"),
+                     ToDoItem(titel: "go home"),
+                     ToDoItem(titel: "milk"),
+                     ToDoItem(titel: "cleanin"),
+                     ToDoItem(titel: "go home")]
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        if let array = localStorage.array(forKey: "TodoListArray") as? [String] {
+        if let array = localStorage.array(forKey: "TodoListArray") as? [ToDoItem] {
             itemArray = array
         }
         
@@ -33,7 +65,10 @@ class ToDoListViewController: UITableViewController{
         
         let cell = tableView.dequeueReusableCell(withIdentifier: "ToDoItemCell", for: indexPath)
         
-        cell.textLabel?.text = itemArray[indexPath.row]
+        let item = itemArray[indexPath.row]
+        cell.textLabel?.text = item.toDOTitel
+        
+        cell.accessoryType = item.done ? .checkmark : .none
         
         return cell
     }
@@ -44,11 +79,9 @@ class ToDoListViewController: UITableViewController{
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         print(itemArray[indexPath.row])
         
-        if tableView.cellForRow(at: indexPath)?.accessoryType != .checkmark {
-            tableView.cellForRow(at: indexPath)?.accessoryType = .checkmark
-        } else {
-            tableView.cellForRow(at: indexPath)?.accessoryType = .none
-        }
+        itemArray[indexPath.row].done = !itemArray[indexPath.row].done
+        
+        tableView.reloadData()
         
         tableView.deselectRow(at: indexPath, animated: true)
     }
@@ -67,7 +100,7 @@ class ToDoListViewController: UITableViewController{
             if textField.text == "" {
                 return
             } else {
-                self.itemArray.append(textField.text!)
+                self.itemArray.append(ToDoItem(titel: textField.text!))
                 self.tableView.reloadData()
                 self.localStorage.set(self.itemArray, forKey: "TodoListArray")
             }
