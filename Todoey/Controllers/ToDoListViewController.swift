@@ -14,45 +14,19 @@ class ToDoListViewController: UITableViewController{
     
     let localStorage = UserDefaults.standard
     
-//    var itemArray = ["milk", "cleanin", "go home","milk1", "cleanin1", "go home1","milk2", "cleanin2", "go home2","milk3", "cleanin3", "go home3","milk4", "cleanin4", "go home4"]
+    let fileDataPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Items.plist")
     
     var itemArray = [ToDoItem(titel: "milk"),
-                     ToDoItem(titel: "cleanin"),
-                     ToDoItem(titel: "go home"),
-                     ToDoItem(titel: "milk"),
-                     ToDoItem(titel: "cleanin"),
-                     ToDoItem(titel: "go home"),
-                     ToDoItem(titel: "milk"),
-                     ToDoItem(titel: "cleanin"),
-                     ToDoItem(titel: "go home"),
-                     ToDoItem(titel: "milk"),
-                     ToDoItem(titel: "cleanin"),
-                     ToDoItem(titel: "go home"),
-                     ToDoItem(titel: "milk"),
-                     ToDoItem(titel: "cleanin"),
-                     ToDoItem(titel: "go home"),
-                     ToDoItem(titel: "milk"),
-                     ToDoItem(titel: "cleanin"),
-                     ToDoItem(titel: "go home"),
-                     ToDoItem(titel: "milk"),
-                     ToDoItem(titel: "cleanin"),
-                     ToDoItem(titel: "go home"),
-                     ToDoItem(titel: "milk"),
-                     ToDoItem(titel: "cleanin"),
-                     ToDoItem(titel: "go home"),
-                     ToDoItem(titel: "milk"),
-                     ToDoItem(titel: "cleanin"),
-                     ToDoItem(titel: "go home"),
-                     ToDoItem(titel: "milk"),
                      ToDoItem(titel: "cleanin"),
                      ToDoItem(titel: "go home")]
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
         if let array = localStorage.array(forKey: "TodoListArray") as? [ToDoItem] {
             itemArray = array
         }
+        
+        loadData()
         
     }
     
@@ -81,6 +55,7 @@ class ToDoListViewController: UITableViewController{
         
         itemArray[indexPath.row].done = !itemArray[indexPath.row].done
         
+        saveItemData()
         tableView.reloadData()
         
         tableView.deselectRow(at: indexPath, animated: true)
@@ -101,8 +76,9 @@ class ToDoListViewController: UITableViewController{
                 return
             } else {
                 self.itemArray.append(ToDoItem(titel: textField.text!))
+                self.saveItemData()
                 self.tableView.reloadData()
-                self.localStorage.set(self.itemArray, forKey: "TodoListArray")
+                
             }
         }
         alert.addTextField { (alertTextField) in
@@ -113,6 +89,29 @@ class ToDoListViewController: UITableViewController{
         alert.addAction(action)
         
         present(alert, animated: true, completion: nil)
+    }
+    
+    func saveItemData(){
+        let encoder = PropertyListEncoder()
+        do {
+            let data = try encoder.encode(itemArray)
+            try data.write(to: fileDataPath!)
+            
+        } catch {
+            print("Error encoding item array, \(error)")
+        }
+        
+    }
+    
+    func loadData(){
+        if let data = try? Data(contentsOf: fileDataPath!) {
+            let decoder = PropertyListDecoder()
+            do {
+                itemArray = try decoder.decode([ToDoItem].self, from: data)
+            } catch {
+                print("Error decoding item array, \(error)")
+            }
+        }
     }
     
 
