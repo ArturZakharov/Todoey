@@ -7,27 +7,25 @@
 //
 
 import UIKit
+import CoreData
 
 class ToDoListViewController: UITableViewController{
 
     @IBOutlet var toDoListTableView: UITableView!
     
-    let localStorage = UserDefaults.standard
+    var itemArray = [Item]()
     
-    let fileDataPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Items.plist")
+    var choosedCategory: ToDoCategory? {
+        didSet {
+            loadData()
+        }
+    }
     
-    var itemArray = [ToDoItem(titel: "milk"),
-                     ToDoItem(titel: "cleanin"),
-                     ToDoItem(titel: "go home")]
+    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        if let array = localStorage.array(forKey: "TodoListArray") as? [ToDoItem] {
-            itemArray = array
-        }
-        
-        loadData()
-        
+        print(FileManager.default.urls(for: .documentDirectory, in: .userDomainMask))
     }
     
     //MARK: - Tableview datasource Methods
@@ -40,7 +38,7 @@ class ToDoListViewController: UITableViewController{
         let cell = tableView.dequeueReusableCell(withIdentifier: "ToDoItemCell", for: indexPath)
         
         let item = itemArray[indexPath.row]
-        cell.textLabel?.text = item.toDOTitel
+        cell.textLabel?.text = item.title
         
         cell.accessoryType = item.done ? .checkmark : .none
         
@@ -54,7 +52,11 @@ class ToDoListViewController: UITableViewController{
         print(itemArray[indexPath.row])
         
         itemArray[indexPath.row].done = !itemArray[indexPath.row].done
-        
+        //or like this for removing this item from core data
+        //first this
+        //context.delete(itemArray[indexPath.row])
+        //and then this. Its very important
+        //itemArray.remove(at: indexPath.row)
         saveItemData()
         tableView.reloadData()
         
@@ -72,14 +74,18 @@ class ToDoListViewController: UITableViewController{
         let action = UIAlertAction(title: "Add item", style: .default) { (action) in
             print("succses")
             
-            if textField.text == "" {
-                return
-            } else {
-                self.itemArray.append(ToDoItem(titel: textField.text!))
-                self.saveItemData()
-                self.tableView.reloadData()
-                
+            if textField.text != "" {
+                let newItem = Item(context: self.context)
+                           newItem.title = textField.text!
+                           newItem.done = false
+                           newItem.parentCategory = self.choosedCategory
+                           self.itemArray.append(newItem)
+                           
+                           self.saveItemData()
+                           
+                           self.tableView.reloadData()
             }
+                
         }
         alert.addTextField { (alertTextField) in
             alertTextField.placeholder = "Create new iteam"
@@ -92,29 +98,56 @@ class ToDoListViewController: UITableViewController{
     }
     
     func saveItemData(){
-        let encoder = PropertyListEncoder()
+        
         do {
-            let data = try encoder.encode(itemArray)
-            try data.write(to: fileDataPath!)
-            
+            try context.save()
         } catch {
-            print("Error encoding item array, \(error)")
+            print("Error saving Item context, \(error)")
         }
         
     }
     
-    func loadData(){
-        if let data = try? Data(contentsOf: fileDataPath!) {
-            let decoder = PropertyListDecoder()
-            do {
-                itemArray = try decoder.decode([ToDoItem].self, from: data)
-            } catch {
-                print("Error decoding item array, \(error)")
+    func loadData(with request:NSFetchRequest<Item> = Item.fetchRequest(), predicate: NSPredicate? = nil){
+        
+        let categoryPredicate = NSPredicate(format: "parentCategory.name MATCHES %@", choosedCategory!.name!)
+        
+        if let additonalPredicate = predicate {
+            request.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [categoryPredicate, additonalPredicate])
+        } else {
+            request.predicate = categoryPredicate
+        }
+        
+        
+        do {
+           itemArray = try context.fetch(request)
+        } catch {
+            print("Error fetching data from context")
+        }
+        
+        tableView.reloadData()
+    }
+}
+
+
+//MARK:- SearchBar metods
+extension ToDoListViewController: UISearchBarDelegate {
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        let request: NSFetchRequest<Item> = Item.fetchRequest()
+        
+        let predicate = NSPredicate(format: "title CONTAINS[cd] %@", searchBar.text!)
+        
+        request.sortDescriptors = [NSSortDescriptor(key: "title", ascending: true)]
+        loadData(with: request, predicate: predicate)
+        
+        
+    }
+    
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        if searchBar.text?.count == 0 {
+            loadData()
+            DispatchQueue.main.async {
+                searchBar.resignFirstResponder()
             }
         }
     }
-    
-
-
 }
-
