@@ -7,7 +7,7 @@
 //
 
 import UIKit
-import CoreData
+import RealmSwift
 
 class ToDoListViewController: UITableViewController{
 
@@ -15,16 +15,18 @@ class ToDoListViewController: UITableViewController{
     
     var itemArray = [Item]()
     
-    var choosedCategory: ToDoCategory? {
-        didSet {
-            loadData()
-        }
-    }
+//    var choosedCategory: ToDoCategory? {
+//        didSet {
+//            loadData()
+//        }
+//    }
     
     let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        let realm = try! Realm()
+        
         print(FileManager.default.urls(for: .documentDirectory, in: .userDomainMask))
     }
     
@@ -74,17 +76,17 @@ class ToDoListViewController: UITableViewController{
         let action = UIAlertAction(title: "Add item", style: .default) { (action) in
             print("succses")
             
-            if textField.text != "" {
-                let newItem = Item(context: self.context)
-                           newItem.title = textField.text!
-                           newItem.done = false
-                           newItem.parentCategory = self.choosedCategory
-                           self.itemArray.append(newItem)
-                           
-                           self.saveItemData()
-                           
-                           self.tableView.reloadData()
-            }
+//            if textField.text != "" {
+//                let newItem = Item(context: self.context)
+//                           newItem.title = textField.text!
+//                           newItem.done = false
+//                           newItem.parentCategory = self.choosedCategory
+//                           self.itemArray.append(newItem)
+//
+//                           self.saveItemData()
+//
+//                           self.tableView.reloadData()
+//            }
                 
         }
         alert.addTextField { (alertTextField) in
@@ -107,44 +109,44 @@ class ToDoListViewController: UITableViewController{
         
     }
     
-    func loadData(with request:NSFetchRequest<Item> = Item.fetchRequest(), predicate: NSPredicate? = nil){
-        
-        let categoryPredicate = NSPredicate(format: "parentCategory.name MATCHES %@", choosedCategory!.name!)
-        
-        if let additonalPredicate = predicate {
-            request.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [categoryPredicate, additonalPredicate])
-        } else {
-            request.predicate = categoryPredicate
-        }
-        
-        
-        do {
-           itemArray = try context.fetch(request)
-        } catch {
-            print("Error fetching data from context")
-        }
-        
-        tableView.reloadData()
-    }
+//    func loadData(with request:NSFetchRequest<Item> = Item.fetchRequest(), predicate: NSPredicate? = nil){
+//
+//        let categoryPredicate = NSPredicate(format: "parentCategory.name MATCHES %@", choosedCategory!.name!)
+//
+//        if let additonalPredicate = predicate {
+//            request.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [categoryPredicate, additonalPredicate])
+//        } else {
+//            request.predicate = categoryPredicate
+//        }
+//
+//
+//        do {
+//           itemArray = try context.fetch(request)
+//        } catch {
+//            print("Error fetching data from context")
+//        }
+//
+//        tableView.reloadData()
+//    }
 }
 
 
 //MARK:- SearchBar metods
 extension ToDoListViewController: UISearchBarDelegate {
-    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-        let request: NSFetchRequest<Item> = Item.fetchRequest()
-        
-        let predicate = NSPredicate(format: "title CONTAINS[cd] %@", searchBar.text!)
-        
-        request.sortDescriptors = [NSSortDescriptor(key: "title", ascending: true)]
-        loadData(with: request, predicate: predicate)
-        
-        
-    }
+//    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+//        let request: NSFetchRequest<Item> = Item.fetchRequest()
+//
+//        let predicate = NSPredicate(format: "title CONTAINS[cd] %@", searchBar.text!)
+//
+//        request.sortDescriptors = [NSSortDescriptor(key: "title", ascending: true)]
+//        loadData(with: request, predicate: predicate)
+//
+//
+//    }
     
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         if searchBar.text?.count == 0 {
-            loadData()
+            //loadData()
             DispatchQueue.main.async {
                 searchBar.resignFirstResponder()
             }

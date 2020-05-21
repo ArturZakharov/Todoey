@@ -7,18 +7,21 @@
 //
 
 import UIKit
-import CoreData
+import RealmSwift
 
 class CategoryTableTableViewController: UITableViewController {
     
-    var categoryArray = [ToDoCategory]()
+    let realm = try! Realm()
+    
+    var categoryArray = [Category]()
     
     let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        
         //let entity = NSEntityDescription.entity(forEntityName: "CategoryTodo", in: context)
-        loadData()
+       // loadData()
     }
 
     // MARK: - Tableview data source
@@ -44,45 +47,48 @@ class CategoryTableTableViewController: UITableViewController {
         let destinationVC = segue.destination as! ToDoListViewController
         
         if let indexPath = tableView.indexPathForSelectedRow {
-            destinationVC.choosedCategory = categoryArray[indexPath.row]
+           // destinationVC.choosedCategory = categoryArray[indexPath.row]
         }
     }
     
     //MARK:- Data manipulation methods
     
-    func saveCategoryData(){
+    func save(category: Category){
         do {
-            try context.save()
+            try realm.write({
+                realm.add(category)
+            })
         } catch {
             print("Error saving Category Context, \(error)")
         }
     }
     
-    func loadData(){
-        let request: NSFetchRequest<ToDoCategory> = ToDoCategory.fetchRequest()
-        do {
-            categoryArray =  try context.fetch(request)
-        } catch {
-            print("Error fetching category form context")
-        }
-    }
+//    func loadData(){
+//        let request: NSFetchRequest<ToDoCategory> = ToDoCategory.fetchRequest()
+//        do {
+//            categoryArray =  try context.fetch(request)
+//        } catch {
+//            print("Error fetching category form context")
+//        }
+//    }
     
     
     
     //MARK:- Add new category
-
+    
     @IBAction func addButtonPressed(_ sender: UIBarButtonItem) {
         var textField = UITextField()
         
         let alertDialog = UIAlertController(title: "Add new Category", message: "", preferredStyle: .alert)
         let action = UIAlertAction(title: "Add Category", style: .default) { (action) in
-            let newCategory = ToDoCategory(context: self.context)
-            newCategory.name = textField.text
-            self.categoryArray.append(newCategory)
-            
-            self.saveCategoryData()
-            self.tableView.reloadData()
-            
+            if textField.text != "" {
+                let newCategory = Category()
+                newCategory.name = textField.text!
+                self.categoryArray.append(newCategory)
+                
+                self.save(category: newCategory)
+                self.tableView.reloadData()
+            }
         }
         
         alertDialog.addTextField { (alertTextField) in
