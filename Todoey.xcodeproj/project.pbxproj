@@ -101,8 +101,8 @@
 		F43FAF59246FE00E0016066F /* Controllers */ = {
 			isa = PBXGroup;
 			children = (
-				F43FAF46246D88740016066F /* ToDoListViewController.swift */,
 				F43FAF822472D4570016066F /* CategoryTableTableViewController.swift */,
+				F43FAF46246D88740016066F /* ToDoListViewController.swift */,
 			);
 			path = Controllers;
 			sourceTree = "<group>";

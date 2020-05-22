@@ -13,27 +13,26 @@ class CategoryTableTableViewController: UITableViewController {
     
     let realm = try! Realm()
     
-    var categoryArray = [Category]()
+    var categoryArray: Results<Category>?
     
-    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
-
     override func viewDidLoad() {
         super.viewDidLoad()
         
         //let entity = NSEntityDescription.entity(forEntityName: "CategoryTodo", in: context)
-       // loadData()
+        loadData()
     }
-
+    
     // MARK: - Tableview data source
-
+    
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return categoryArray.count
-      
+        return categoryArray?.count ?? 1
+        
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "categoryCell", for: indexPath)
-        cell.textLabel?.text = categoryArray[indexPath.row].name
+        
+        cell.textLabel?.text = categoryArray?[indexPath.row].name ?? "No category added yet"
         return cell
     }
     
@@ -47,7 +46,7 @@ class CategoryTableTableViewController: UITableViewController {
         let destinationVC = segue.destination as! ToDoListViewController
         
         if let indexPath = tableView.indexPathForSelectedRow {
-           // destinationVC.choosedCategory = categoryArray[indexPath.row]
+            destinationVC.choosedCategory = categoryArray?[indexPath.row]
         }
     }
     
@@ -63,14 +62,12 @@ class CategoryTableTableViewController: UITableViewController {
         }
     }
     
-//    func loadData(){
-//        let request: NSFetchRequest<ToDoCategory> = ToDoCategory.fetchRequest()
-//        do {
-//            categoryArray =  try context.fetch(request)
-//        } catch {
-//            print("Error fetching category form context")
-//        }
-//    }
+    func loadData(){
+        //Results<Element> or Results<Element> is the same like Array<String>
+        categoryArray = realm.objects(Category.self)
+        
+        tableView.reloadData()
+    }
     
     
     
@@ -84,7 +81,6 @@ class CategoryTableTableViewController: UITableViewController {
             if textField.text != "" {
                 let newCategory = Category()
                 newCategory.name = textField.text!
-                self.categoryArray.append(newCategory)
                 
                 self.save(category: newCategory)
                 self.tableView.reloadData()
