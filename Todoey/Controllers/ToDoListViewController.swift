@@ -8,8 +8,9 @@
 
 import UIKit
 import RealmSwift
+import ChameleonFramework
 
-class ToDoListViewController: UITableViewController{
+class ToDoListViewController: SwipeTableViewController{
     
     @IBOutlet var toDoListTableView: UITableView!
     
@@ -36,11 +37,18 @@ class ToDoListViewController: UITableViewController{
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
-        let cell = tableView.dequeueReusableCell(withIdentifier: "ToDoItemCell", for: indexPath)
+        let cell = super.tableView(tableView, cellForRowAt: indexPath)
         
         if let item = toDoItems?[indexPath.row] {
             cell.textLabel?.text = item.title
             cell.accessoryType = item.done ? .checkmark : .none
+            
+            let parentColor = UIColor(hexString: choosedCategory!.color)
+            if let color = parentColor?.darken(byPercentage: CGFloat(indexPath.row) / CGFloat(toDoItems!.count) / 1.4){
+                cell.backgroundColor = color
+                cell.textLabel?.textColor = ContrastColorOf(color, returnFlat: true)
+            }
+            
         } else {
             cell.textLabel?.text = "No Items added yet"
         }
@@ -91,18 +99,11 @@ class ToDoListViewController: UITableViewController{
             print("succses")
             
             if textField.text != "" {
-                if let currentCategory = self.choosedCategory {
-                    do {
-                        try self.realm.write({
-                            let newItem = Item()
-                            newItem.title = textField.text!
-                            newItem.dateCreated = Date()
-                            currentCategory.items.append(newItem)
-                        })
-                    } catch {
-                        print("Error savimg Item to parentCategory, \(error)")
-                    }
-                }
+                let newItem = Item()
+                newItem.title = textField.text!
+                newItem.dateCreated = Date()
+                self.save(item: newItem)
+                
                 self.tableView.reloadData()
             }
             
@@ -117,35 +118,71 @@ class ToDoListViewController: UITableViewController{
         present(alert, animated: true, completion: nil)
     }
     
+    override func deleteCell(at indexPath: IndexPath) {
+        //The wrong way to do it, because you deleting item only from category but in items its stays, its not good
+//        if let currentCategory = self.choosedCategory {
+//            do {
+//                try self.realm.write({
+//                    currentCategory.items.remove(at: indexPath.row)
+//                })
+//            } catch {
+//                print("Error savimg Item to parentCategory, \(error)")
+//            }
+//        }
+        
+        if let item = toDoItems?[indexPath.row] {
+            do {
+                try realm.write({
+                    realm.delete(item)
+                })
+            } catch {
+                print("Error deleting item, \(error)")
+            }
+        }
+    }
+    
+    func save(item: Item){
+        if let currentCategory = self.choosedCategory {
+            do {
+                try self.realm.write({
+                    currentCategory.items.append(item)
+                })
+            } catch {
+                print("Error savimg Item to parentCategory, \(error)")
+            }
+        }
+    }
     
     
     func loadData(){
-//        if let items = choosedCategory?.items {
-//            toDoItems = items.sorted(byKeyPath: "title ", ascending: true)
-//            print("All is good")
-//        }
+        //        if let items = choosedCategory?.items {
+        //            toDoItems = items.sorted(byKeyPath: "title ", ascending: true)
+        //            print("All is good")
+        //        }
         toDoItems = choosedCategory?.items.sorted(byKeyPath: "dateCreated", ascending: true)
         tableView.reloadData()
     }
 }
 
 
+
+
 //MARK:- SearchBar metods
 extension ToDoListViewController: UISearchBarDelegate {
-        func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-            
-            toDoItems = toDoItems?.filter("title CONTAINS[cd] %@", searchBar.text!).sorted(byKeyPath: "dateCreated", ascending: true)
-            tableView.reloadData() 
-            
-//            let request: NSFetchRequest<Item> = Item.fetchRequest()
-//
-//            let predicate = NSPredicate(format: "title CONTAINS[cd] %@", searchBar.text!)
-//
-//            request.sortDescriptors = [NSSortDescriptor(key: "title", ascending: true)]
-//            loadData(with: request, predicate: predicate)
-//
-
-        }
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        
+        toDoItems = toDoItems?.filter("title CONTAINS[cd] %@", searchBar.text!).sorted(byKeyPath: "dateCreated", ascending: true)
+        tableView.reloadData() 
+        
+        //            let request: NSFetchRequest<Item> = Item.fetchRequest()
+        //
+        //            let predicate = NSPredicate(format: "title CONTAINS[cd] %@", searchBar.text!)
+        //
+        //            request.sortDescriptors = [NSSortDescriptor(key: "title", ascending: true)]
+        //            loadData(with: request, predicate: predicate)
+        //
+        
+    }
     
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         if searchBar.text?.count == 0 {

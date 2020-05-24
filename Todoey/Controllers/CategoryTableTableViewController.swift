@@ -8,8 +8,9 @@
 
 import UIKit
 import RealmSwift
+import ChameleonFramework
 
-class CategoryTableTableViewController: UITableViewController {
+class CategoryTableTableViewController: SwipeTableViewController {
     
     let realm = try! Realm()
     
@@ -17,8 +18,6 @@ class CategoryTableTableViewController: UITableViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        //let entity = NSEntityDescription.entity(forEntityName: "CategoryTodo", in: context)
         loadData()
     }
     
@@ -30,9 +29,11 @@ class CategoryTableTableViewController: UITableViewController {
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "categoryCell", for: indexPath)
-        
-        cell.textLabel?.text = categoryArray?[indexPath.row].name ?? "No category added yet"
+        let cell = super.tableView(tableView, cellForRowAt: indexPath)
+        if let category = categoryArray?[indexPath.row] {
+            cell.textLabel?.text = category.name ?? "No category added yet"
+            cell.backgroundColor = UIColor(hexString: category.color ?? "#FFFFFF")
+        }
         return cell
     }
     
@@ -69,6 +70,18 @@ class CategoryTableTableViewController: UITableViewController {
         tableView.reloadData()
     }
     
+    override func deleteCell(at indexPath: IndexPath) {
+        if let categoryForDeleting = self.categoryArray?[indexPath.row] {
+            do {
+                try self.realm.write({
+                    self.realm.delete(categoryForDeleting)
+                })
+            } catch {
+                print("Error deleting category from realm, \(error)")
+            }
+        }
+    }
+    
     
     
     //MARK:- Add new category
@@ -81,7 +94,9 @@ class CategoryTableTableViewController: UITableViewController {
             if textField.text != "" {
                 let newCategory = Category()
                 newCategory.name = textField.text!
-                
+                let color = UIColor.randomFlat().hexValue()
+                newCategory.color = color
+                print(color)
                 self.save(category: newCategory)
                 self.tableView.reloadData()
             }
@@ -99,3 +114,4 @@ class CategoryTableTableViewController: UITableViewController {
     }
     
 }
+
