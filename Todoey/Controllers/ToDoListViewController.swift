@@ -13,6 +13,7 @@ import ChameleonFramework
 class ToDoListViewController: SwipeTableViewController{
     
     @IBOutlet var toDoListTableView: UITableView!
+    @IBOutlet weak var searchBar: UISearchBar!
     
     var toDoItems: Results<Item>?
     
@@ -28,6 +29,28 @@ class ToDoListViewController: SwipeTableViewController{
     override func viewDidLoad() {
         super.viewDidLoad()
         print(FileManager.default.urls(for: .documentDirectory, in: .userDomainMask))
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        title = choosedCategory?.name
+        guard let colorHex = choosedCategory?.color else {fatalError()}
+        updateNavBar(with: colorHex)
+        
+        guard let navBarColor = UIColor(hexString: colorHex) else {fatalError()}
+        searchBar.barTintColor = navBarColor
+        searchBar.searchTextField.backgroundColor = UIColor.white
+        
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        updateNavBar(with: "1D9BF6")
+    }
+    
+    //MARK:- Nav Bar setup Methods
+    
+    func updateNavBar(with hexColor: String){
+        let updateNavBar = UpdateNavigationController()
+        updateNavBar.updateNavBar(hexColor: hexColor, context: self, navController: navigationController)
     }
     
     //MARK: - Tableview datasource Methods
@@ -52,10 +75,6 @@ class ToDoListViewController: SwipeTableViewController{
         } else {
             cell.textLabel?.text = "No Items added yet"
         }
-        
-        
-        
-        
         return cell
     }
     
@@ -115,7 +134,14 @@ class ToDoListViewController: SwipeTableViewController{
         
         alert.addAction(action)
         
-        present(alert, animated: true, completion: nil)
+        present(alert, animated: true){
+            alert.view.superview?.isUserInteractionEnabled = true
+            alert.view.superview?.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(self.dismissAlertOnTapOutside)))
+        }
+    }
+    
+    @objc func dismissAlertOnTapOutside(){
+       self.dismiss(animated: true, completion: nil)
     }
     
     override func deleteCell(at indexPath: IndexPath) {

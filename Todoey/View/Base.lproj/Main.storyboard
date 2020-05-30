@@ -6,7 +6,7 @@
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
-        <!--Category Table Table View Controller-->
+        <!--Category-->
         <scene sceneID="bZR-gs-eAg">
             <objects>
                 <tableViewController id="1xy-89-Sk8" customClass="CategoryTableTableViewController" customModule="Todoey" customModuleProvider="target" sceneMemberID="viewController">
@@ -29,7 +29,7 @@
                             <outlet property="delegate" destination="1xy-89-Sk8" id="GRj-v9-krS"/>
                         </connections>
                     </tableView>
-                    <navigationItem key="navigationItem" id="X1V-sA-PDP">
+                    <navigationItem key="navigationItem" title="Category" id="X1V-sA-PDP">
                         <barButtonItem key="rightBarButtonItem" systemItem="add" id="xD1-ab-McK">
                             <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                             <connections>
@@ -45,7 +45,7 @@
             </objects>
             <point key="canvasLocation" x="248" y="49"/>
         </scene>
-        <!--To Do List View Controller-->
+        <!--Items-->
         <scene sceneID="uQy-Se-6nk">
             <objects>
                 <tableViewController id="G9h-ch-0mN" customClass="ToDoListViewController" customModule="Todoey" customModuleProvider="target" sceneMemberID="viewController">
@@ -76,15 +76,15 @@
                             <outlet property="delegate" destination="G9h-ch-0mN" id="3Le-DP-hwM"/>
                         </connections>
                     </tableView>
-                    <navigationItem key="navigationItem" id="vzu-lI-j0G">
+                    <navigationItem key="navigationItem" title="Items" id="vzu-lI-j0G">
                         <barButtonItem key="rightBarButtonItem" systemItem="add" id="pSL-aX-UNG">
-                            <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                             <connections>
                                 <action selector="addButtonPressed:" destination="G9h-ch-0mN" id="m1d-Pp-RZe"/>
                             </connections>
                         </barButtonItem>
                     </navigationItem>
                     <connections>
+                        <outlet property="searchBar" destination="CT0-nk-1B1" id="KBf-W7-1FM"/>
                         <outlet property="toDoListTableView" destination="DIW-Ck-p6n" id="Q3y-7f-0vJ"/>
                     </connections>
                 </tableViewController>
@@ -97,10 +97,9 @@
             <objects>
                 <navigationController automaticallyAdjustsScrollViewInsets="NO" id="M0T-hl-L2K" sceneMemberID="viewController">
                     <toolbarItems/>
-                    <navigationBar key="navigationBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="iVV-9c-azT">
-                        <rect key="frame" x="0.0" y="44" width="414" height="44"/>
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" largeTitles="YES" id="iVV-9c-azT">
+                        <rect key="frame" x="0.0" y="44" width="414" height="96"/>
                         <autoresizingMask key="autoresizingMask"/>
-                        <color key="barTintColor" red="0.0" green="0.47843137250000001" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <textAttributes key="titleTextAttributes">
                             <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         </textAttributes>

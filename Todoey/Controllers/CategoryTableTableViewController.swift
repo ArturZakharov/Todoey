@@ -21,6 +21,11 @@ class CategoryTableTableViewController: SwipeTableViewController {
         loadData()
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        let updateNavBar = UpdateNavigationController()
+        updateNavBar.updateNavBar(hexColor: "1D9BF6", context: self, navController: navigationController)
+    }
+    
     // MARK: - Tableview data source
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -41,6 +46,7 @@ class CategoryTableTableViewController: SwipeTableViewController {
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         performSegue(withIdentifier: "goTOItemsSegue", sender: self)
+        tableView.deselectRow(at: indexPath, animated: true)
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
@@ -108,10 +114,18 @@ class CategoryTableTableViewController: SwipeTableViewController {
         }
         
         alertDialog.addAction(action)
-        
-        present(alertDialog, animated: true, completion: nil)
-        
+       
+        present(alertDialog, animated: true){
+            alertDialog.view.superview?.isUserInteractionEnabled = true
+            alertDialog.view.superview?.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(self.dismissAlertOnTapOutside)))
+        }
     }
     
+    @objc func dismissAlertOnTapOutside(){
+          self.dismiss(animated: true, completion: nil)
+       }
+    
 }
+
+
 
